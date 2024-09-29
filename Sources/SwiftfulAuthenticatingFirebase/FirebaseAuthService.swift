@@ -4,6 +4,10 @@ import SignInAppleAsync
 @preconcurrency import FirebaseAuth
 
 public struct FirebaseAuthService: AuthService {
+    
+    public init() {
+        
+    }
 
     public func getAuthenticatedUser() -> UserAuthInfo? {
         if let currentUser = Auth.auth().currentUser {
