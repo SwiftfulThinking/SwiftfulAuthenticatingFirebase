@@ -9,22 +9,23 @@ import SwiftfulAuthenticating
 
 extension UserAuthInfo {
 
-    init(user: User) {
+    /// Initialze from Firebase Auth User
+    init(user: User, firstName: String? = nil, lastName: String? = nil) {
         self.init(
             uid: user.uid,
             email: user.email,
             isAnonymous: user.isAnonymous,
             authProviders: user.providerData.compactMap({ AuthProviderOption(providerId: $0.providerID) }),
             displayName: user.displayName,
-            firstName: nil,
-            lastName: nil,
+            firstName: firstName,
+            lastName: lastName,
             phoneNumber: user.phoneNumber,
             photoURL: user.photoURL,
             creationDate: user.metadata.creationDate,
             lastSignInDate: user.metadata.lastSignInDate
         )
     }
-
+    
 }
 
 extension AuthProviderOption {

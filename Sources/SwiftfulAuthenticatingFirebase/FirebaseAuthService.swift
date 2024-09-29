@@ -72,7 +72,7 @@ extension FirebaseAuthService {
         let authDataResult = try await Auth.auth().signInAnonymously()
         
         // Convert Firebase AuthDataResult to local UserAuthInfo
-        return authDataResult.asAuthInfo
+        return authDataResult.asAuthInfo()
     }
 
     @MainActor
@@ -82,26 +82,81 @@ extension FirebaseAuthService {
         // Sign in to Apple
         let response = try await helper.signIn()
         
-        // Sign in to Firebase
-        return try await signIn(provider: AuthProviderOption.apple, idToken: response.token, rawNonce: response.nonce)
-    }
-
-    private func signIn(provider: AuthProviderOption, idToken: String, rawNonce: String) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
         // Convert SSO tokens to Firebase credential
-        let credential = OAuthProvider.credential(providerID: provider.providerId, idToken: idToken, rawNonce: rawNonce)
-
-        // Sign in to Firebase
-        let authDataResult = try await Auth.auth().signIn(with: credential)
+        let credential = OAuthProvider.credential(
+            providerID: AuthProviderOption.apple.providerId,
+            idToken: response.token,
+            rawNonce: response.nonce
+        )
         
+        // Sign in to Firebase
+        let result = try await signInOrLink(credential: credential)
+
         // Convert Firebase AuthDataResult to local UserAuthInfo
-        return authDataResult.asAuthInfo
+        let (user, isNewUser) = result.asAuthInfo(firstName: response.firstName, lastName: response.lastName)
+        
+        // If new user, update user's Firebase Auth profile
+        // Note: possibly change to all sign in, not just new users? what's the overwrite case?
+        if isNewUser {
+            try await updateUserProfile(
+                displayName: user.displayName,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                photoUrl: user.photoURL
+            )
+        }
+        
+        return (user, isNewUser)
+    }
+    
+    private func signInOrLink(credential: AuthCredential) async throws -> AuthDataResult {
+        // If user is anonymous, attempt to link credential to existing account. On failure, fall-back to signIn to create a new account.
+        if let user = Auth.auth().currentUser, user.isAnonymous, let result = try? await user.link(with: credential) {
+            return result
+        }
+        
+        return try await Auth.auth().signIn(with: credential)
     }
 
+    private func updateUserProfile(displayName: String?, firstName: String?, lastName: String?, photoUrl: URL?) async throws {
+        let request = Auth.auth().currentUser?.createProfileChangeRequest()
+        
+        var didMakeChanges: Bool = false
+        
+        // Add display name to Firebase Auth profile
+        if let displayName, !displayName.isEmpty {
+            request?.displayName = displayName
+            didMakeChanges = true
+            
+        // If no display name, use first or last name instead
+        } else if Auth.auth().currentUser?.displayName == nil {
+            if let firstName {
+                request?.displayName = firstName
+                didMakeChanges = true
+            } else if let lastName {
+                request?.displayName = lastName
+                didMakeChanges = true
+            }
+        }
+        
+        if let photoUrl {
+            request?.photoURL = photoUrl
+            didMakeChanges = true
+        }
+        
+        if didMakeChanges {
+            try await request?.commitChanges()
+        }
+    }
 }
 
 extension AuthDataResult {
 
-    var asAuthInfo: (user: UserAuthInfo, isNewUser: Bool) {
-        (UserAuthInfo(user: user), additionalUserInfo?.isNewUser ?? true)
+    func asAuthInfo(firstName: String? = nil, lastName: String? = nil) -> (user: UserAuthInfo, isNewUser: Bool) {
+        let user = UserAuthInfo(user: user, firstName: firstName, lastName: lastName)
+        let isNewUser = additionalUserInfo?.isNewUser ?? true
+        return (user, isNewUser)
     }
 }
+
+
