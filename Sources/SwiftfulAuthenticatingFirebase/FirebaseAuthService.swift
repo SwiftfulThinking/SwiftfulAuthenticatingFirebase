@@ -3,9 +3,9 @@ import SwiftfulAuthenticating
 import SignInAppleAsync
 @preconcurrency import FirebaseAuth
 
-struct FirebaseAuthService: AuthService {
+public struct FirebaseAuthService: AuthService {
 
-    func getAuthenticatedUser() -> UserAuthInfo? {
+    public func getAuthenticatedUser() -> UserAuthInfo? {
         if let currentUser = Auth.auth().currentUser {
             return UserAuthInfo(user: currentUser)
         }
@@ -13,7 +13,7 @@ struct FirebaseAuthService: AuthService {
         return nil
     }
 
-    func addAuthenticatedUserListener() -> AsyncStream<UserAuthInfo?> {
+    public func addAuthenticatedUserListener() -> AsyncStream<UserAuthInfo?> {
         AsyncStream { continuation in
             _ = Auth.auth().addStateDidChangeListener { _, currentUser in
                 if let currentUser {
@@ -26,7 +26,7 @@ struct FirebaseAuthService: AuthService {
         }
     }
 
-    func signIn(option: SignInOption) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
+    public func signIn(option: SignInOption) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
         switch option {
         case .apple:
             return try await authenticateUser_Apple()
@@ -35,11 +35,11 @@ struct FirebaseAuthService: AuthService {
         }
     }
 
-    func signOut() throws {
+    public func signOut() throws {
         try Auth.auth().signOut()
     }
 
-    func deleteAccount() async throws {
+    public func deleteAccount() async throws {
         guard let user = Auth.auth().currentUser else {
             throw AuthError.userNotFound
         }
