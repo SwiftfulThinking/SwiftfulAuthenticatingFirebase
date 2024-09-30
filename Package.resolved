@@ -1,5 +1,5 @@
 {
-  "originHash" : "3d9747bba1ea1855ae637e444fb8d85e7656fe367a7504ed59185d49ae60efc3",
+  "originHash" : "a7cf7bf0886bf282b823e17e9da5ec224f26cf0a67e4570bededee8525b22e44",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -17,6 +17,15 @@
       "state" : {
         "revision" : "21fe1af9be463a359aaf8d96789ef73fc3760d09",
         "version" : "11.0.1"
+      }
+    },
+    {
+      "identity" : "appauth-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/openid/AppAuth-iOS.git",
+      "state" : {
+        "revision" : "c89ed571ae140f8eb1142735e6e23d7bb8c34cb2",
+        "version" : "1.7.5"
       }
     },
     {
@@ -47,6 +56,15 @@
       }
     },
     {
+      "identity" : "googlesignin-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GoogleSignIn-iOS.git",
+      "state" : {
+        "revision" : "65fb3f1aa6ffbfdc79c4e22178a55cd91561f5e9",
+        "version" : "8.0.0"
+      }
+    },
+    {
       "identity" : "googleutilities",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/GoogleUtilities.git",
@@ -71,6 +89,15 @@
       "state" : {
         "revision" : "a2ab612cb980066ee56d90d60d8462992c07f24b",
         "version" : "3.5.0"
+      }
+    },
+    {
+      "identity" : "gtmappauth",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/google/GTMAppAuth.git",
+      "state" : {
+        "revision" : "5d7d66f647400952b1758b230e019b07c0b4b22a",
+        "version" : "4.1.1"
       }
     },
     {
@@ -128,6 +155,15 @@
       }
     },
     {
+      "identity" : "signingoogleasync",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftfulThinking/SignInGoogleAsync.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d7ddd03c74d66e6914fa5a07eaff9f91fb436de5"
+      }
+    },
+    {
       "identity" : "swift-protobuf",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-protobuf.git",
@@ -141,8 +177,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git",
       "state" : {
-        "revision" : "d32c9aaa82617cb2dbed10ce3ff147780ef8d100",
-        "version" : "0.0.1"
+        "branch" : "main",
+        "revision" : "3378e74af74117dbc026c4e235e82f96bd7f73c0"
       }
     },
     {

@@ -38,6 +38,14 @@ extension AuthProviderOption {
             return .apple
         case .email:
             return .email
+        case .phone:
+            return .phone
+        case .facebook:
+            return .facebook
+        case .gameCenter:
+            return .gameCenter
+        case .github:
+            return .gitHub
         }
     }
 

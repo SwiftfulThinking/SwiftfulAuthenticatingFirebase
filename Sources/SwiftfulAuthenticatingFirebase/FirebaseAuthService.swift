@@ -1,6 +1,7 @@
 import Foundation
 import SwiftfulAuthenticating
 import SignInAppleAsync
+import SignInGoogleAsync
 @preconcurrency import FirebaseAuth
 
 public struct FirebaseAuthService: AuthService {
@@ -34,6 +35,8 @@ public struct FirebaseAuthService: AuthService {
         switch option {
         case .apple:
             return try await authenticateUser_Apple()
+        case .google(GIDClientID: let GIDClientID):
+            return try await authenticateUser_Google(GIDClientID: GIDClientID)
         case .anonymous:
             return try await authenticateUser_Anonymous()
         }
@@ -93,11 +96,39 @@ extension FirebaseAuthService {
             rawNonce: response.nonce
         )
         
+        return try await handleConnectToFirebase(
+            credential: credential,
+            firstName: response.firstName,
+            lastName: response.lastName
+        )
+    }
+    
+    @MainActor
+    private func authenticateUser_Google(GIDClientID: String) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
+        let helper = SignInWithGoogleHelper(GIDClientID: GIDClientID)
+
+        // Sign in to Apple
+        let response = try await helper.signIn()
+        
+        // Convert SSO tokens to Firebase credential
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: response.idToken,
+            accessToken: response.accessToken
+        )
+        
+        return try await handleConnectToFirebase(
+            credential: credential,
+            firstName: response.firstName,
+            lastName: response.lastName
+        )
+    }
+    
+    private func handleConnectToFirebase(credential: AuthCredential, firstName: String?, lastName: String?) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
         // Sign in to Firebase
         let result = try await signInOrLink(credential: credential)
 
         // Convert Firebase AuthDataResult to local UserAuthInfo
-        let (user, isNewUser) = result.asAuthInfo(firstName: response.firstName, lastName: response.lastName)
+        let (user, isNewUser) = result.asAuthInfo(firstName: firstName, lastName: lastName)
         
         // If new user, update user's Firebase Auth profile
         // Note: possibly change to all sign in, not just new users? what's the overwrite case?
