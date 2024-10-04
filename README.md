@@ -1,4 +1,4 @@
-# Firebase Authentication for SwiftfulAuthenticating ✅
+# Firebase Auth for SwiftfulAuthenticating ✅
 
 Add FirebaseAuth support to a Swift application through SwiftfulAuthenticating framework.
 
