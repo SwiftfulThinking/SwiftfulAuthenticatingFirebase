@@ -145,11 +145,33 @@ extension FirebaseAuthService {
     }
     
     private func signInOrLink(credential: AuthCredential) async throws -> AuthDataResult {
-        // If user is anonymous, attempt to link credential to existing account. On failure, fall-back to signIn to create a new account.
-        if let user = Auth.auth().currentUser, user.isAnonymous, let result = try? await user.link(with: credential) {
-            return result
+        
+        // If user is anonymous, attempt to link SSO credential to existing account.
+        if let user = Auth.auth().currentUser, user.isAnonymous {
+            do {
+                // Try to link to existing anonymous account
+                return try await user.link(with: credential)
+            } catch let error as NSError {
+                
+                // If link() failed due to providerAlreadyLinked or credentialAlreadyInUse,
+                // that means the existing account already has a linked anonymous account.
+                // We handle this gracefully by dropping the current anonymous account
+                // and switching to the existing account that is connected to the SSO.
+                // However, Firebase will throw "duplicate credential" error if we try to use the same credential again
+                // So in this edge case, Firebase provides an "UpdatedCredentialKey" to use for the 2nd attempt
+                let authError = AuthErrorCode(rawValue: error.code)
+                switch authError {
+                case .providerAlreadyLinked, .credentialAlreadyInUse:
+                    if let secondaryCredential = error.userInfo["FIRAuthErrorUserInfoUpdatedCredentialKey"] as? AuthCredential {
+                        return try await Auth.auth().signIn(with: secondaryCredential)
+                    }
+                default:
+                    break
+                }
+            }
         }
         
+        // The default is a regular signIn() without link()
         return try await Auth.auth().signIn(with: credential)
     }
 
