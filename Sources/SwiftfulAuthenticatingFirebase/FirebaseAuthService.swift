@@ -18,9 +18,9 @@ public struct FirebaseAuthService: AuthService {
         return nil
     }
 
-    public func addAuthenticatedUserListener() -> AsyncStream<UserAuthInfo?> {
+    public func addAuthenticatedUserListener(onListenerAttached: (any NSObjectProtocol) -> Void) -> AsyncStream<UserAuthInfo?> {
         AsyncStream { continuation in
-            _ = Auth.auth().addStateDidChangeListener { _, currentUser in
+            let listener = Auth.auth().addStateDidChangeListener { _, currentUser in
                 if let currentUser {
                     let user = UserAuthInfo(user: currentUser)
                     continuation.yield(user)
@@ -28,6 +28,7 @@ public struct FirebaseAuthService: AuthService {
                     continuation.yield(nil)
                 }
             }
+            onListenerAttached(listener)
         }
     }
 

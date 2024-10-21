@@ -177,8 +177,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git",
       "state" : {
-        "revision" : "d11c4ec4f5ac144b56436b55d7900bbfde2cd73d",
-        "version" : "1.0.2"
+        "revision" : "f340c67e779b5255bf30161b2f052078c92b5d7a",
+        "version" : "1.0.3"
       }
     },
     {
