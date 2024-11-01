@@ -177,8 +177,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git",
       "state" : {
-        "revision" : "f340c67e779b5255bf30161b2f052078c92b5d7a",
-        "version" : "1.0.3"
+        "revision" : "225d818fb3512b9d3a236c2bdee6a84143fa7f8d",
+        "version" : "1.0.5"
       }
     },
     {
@@ -186,8 +186,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulLogging.git",
       "state" : {
-        "revision" : "65f321ae99d6380e01e7d103ca9c3fd2292545c4",
-        "version" : "1.0.4"
+        "revision" : "de4f3398e557ede01bc5407c802eb7769d804e5e",
+        "version" : "1.0.5"
       }
     }
   ],

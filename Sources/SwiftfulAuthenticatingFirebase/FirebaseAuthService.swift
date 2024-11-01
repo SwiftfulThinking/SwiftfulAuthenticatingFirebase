@@ -31,6 +31,10 @@ public struct FirebaseAuthService: AuthService {
             onListenerAttached(listener)
         }
     }
+    
+    public func removeAuthenticatedUserListener(listener: any NSObjectProtocol) {
+        Auth.auth().removeStateDidChangeListener(listener)
+    }
 
     public func signIn(option: SignInOption) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
         switch option {
