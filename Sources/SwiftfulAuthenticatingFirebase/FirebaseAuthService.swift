@@ -1,10 +1,15 @@
 import Foundation
+import Firebase
 import SwiftfulAuthenticating
 import SignInAppleAsync
 import SignInGoogleAsync
 @preconcurrency import FirebaseAuth
 
 public struct FirebaseAuthService: AuthService {
+    
+    public static var clientId: String? {
+        FirebaseApp.app()?.options.clientID
+    }
     
     public init() {
         
