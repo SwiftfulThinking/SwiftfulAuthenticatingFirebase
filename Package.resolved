@@ -137,15 +137,6 @@
       }
     },
     {
-      "identity" : "sendabledictionary",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SwiftfulThinking/SendableDictionary.git",
-      "state" : {
-        "revision" : "87eca8178bb0b64a2f1a6191ac42b2e73620db07",
-        "version" : "1.0.0"
-      }
-    },
-    {
       "identity" : "signinappleasync",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SignInAppleAsync.git",
@@ -177,17 +168,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git",
       "state" : {
-        "revision" : "225d818fb3512b9d3a236c2bdee6a84143fa7f8d",
-        "version" : "1.0.5"
-      }
-    },
-    {
-      "identity" : "swiftfullogging",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SwiftfulThinking/SwiftfulLogging.git",
-      "state" : {
-        "revision" : "de4f3398e557ede01bc5407c802eb7769d804e5e",
-        "version" : "1.0.5"
+        "revision" : "50b14144c4a239ac59b748d6a6ece53ec943318a",
+        "version" : "1.0.10"
       }
     }
   ],

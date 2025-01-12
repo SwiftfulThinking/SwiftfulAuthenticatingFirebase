@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import Foundation
 import Firebase
 import SwiftfulAuthenticating
 import SignInAppleAsync
@@ -23,7 +23,7 @@ public struct FirebaseAuthService: AuthService {
         return nil
     }
 
-    public func addAuthenticatedUserListener(onListenerAttached: (any NSObjectProtocol) -> Void) -> AsyncStream<UserAuthInfo?> {
+    public func addAuthenticatedUserListener() -> AsyncStream<UserAuthInfo?> {
         AsyncStream { continuation in
             let listener = Auth.auth().addStateDidChangeListener { _, currentUser in
                 if let currentUser {
@@ -33,7 +33,10 @@ public struct FirebaseAuthService: AuthService {
                     continuation.yield(nil)
                 }
             }
-            onListenerAttached(listener)
+            
+            continuation.onTermination = { @Sendable _ in
+                Auth.auth().removeStateDidChangeListener(listener)
+            }
         }
     }
     
