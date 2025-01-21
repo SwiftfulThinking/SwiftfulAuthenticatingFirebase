@@ -29,6 +29,8 @@ public struct FirebaseAuthService: AuthService {
                 if let currentUser {
                     let user = UserAuthInfo(user: currentUser)
                     continuation.yield(user)
+                    
+                    validateAuthToken(user: currentUser)
                 } else {
                     continuation.yield(nil)
                 }
@@ -40,8 +42,25 @@ public struct FirebaseAuthService: AuthService {
         }
     }
     
-    public func removeAuthenticatedUserListener(listener: any NSObjectProtocol) {
-        Auth.auth().removeStateDidChangeListener(listener)
+    // The typical Auth.auth().addStateDidChangeListener and Auth.auth().currentUser rely on cached data in the Keychain.
+    // Here, we force a token refresh, which will async hit the server and ensure the user is still authenticated remotely.
+    // For example, if we delete the user from the Firebase Authentication console, the cached data wouldn't update automatically.
+    private func validateAuthToken(user: User) {
+        Task {
+            do {
+                let token = try await user.getIDToken(forcingRefresh: true)
+            } catch let error as NSError {
+                print(error)
+                print(error)
+                
+                if error.code == AuthErrorCode.userTokenExpired.rawValue || error.code == AuthErrorCode.userNotFound.rawValue {
+                    print("YUP!")
+                    print(error)
+                    print(error)
+
+                }
+            }
+        }
     }
 
     public func signIn(option: SignInOption) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
