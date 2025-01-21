@@ -49,16 +49,9 @@ public struct FirebaseAuthService: AuthService {
         Task {
             do {
                 let token = try await user.getIDToken(forcingRefresh: true)
-                print("TOKEN SUCCESS")
             } catch let error as NSError {
-                print(error)
-                print(error)
-                
                 if error.code == AuthErrorCode.userTokenExpired.rawValue || error.code == AuthErrorCode.userNotFound.rawValue {
-                    print("YUP!")
-                    print(error)
-                    print(error)
-
+                    try? signOut()
                 }
             }
         }
