@@ -49,6 +49,7 @@ public struct FirebaseAuthService: AuthService {
         Task {
             do {
                 let token = try await user.getIDToken(forcingRefresh: true)
+                print("TOKEN SUCCESS")
             } catch let error as NSError {
                 print(error)
                 print(error)
