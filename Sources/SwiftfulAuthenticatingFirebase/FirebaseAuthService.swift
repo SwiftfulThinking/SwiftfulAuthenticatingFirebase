@@ -63,31 +63,43 @@ public struct FirebaseAuthService: AuthService {
     /// Delete the user's authentication.
     ///
     /// WARNING: This will trigger the OS modal for the user to authenticate again before deleting their account. This is required as a security precaution for Firebase. If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token.
-    public func deleteAccount(option: SignInOption) async throws {
+    public func deleteAccount(option: SignInOption, performDeleteActionsBeforeAuthIsRevoked: () async -> Void) async throws {
         guard let userAuthInfo = getAuthenticatedUser() else {
             throw AuthError.userNotFound
         }
         
+        var reauth: (rUser: UserAuthInfo, rIsNewUser: Bool, rAuthorizationCode: String?)? = nil
         switch option {
         case .apple:
             let (rUser, rIsNewUser, rAuthCode) = try await authenticateUser_Apple()
+            reauth = (rUser, rIsNewUser, rAuthCode)
             
-            // Check reauth user is the same
-            guard rUser.uid == userAuthInfo.uid, !rIsNewUser else {
-                throw AuthError.changedAuthenticatedUser
-            }
             
-            // Revoke the token https://firebase.google.com/docs/auth/ios/apple#token_revocation
-            try await Auth.auth().revokeToken(withAuthorizationCode: rAuthCode)
         case .anonymous:
             break
         case .google(let GIDClientID):
             let (rUser, rIsNewUser) = try await authenticateUser_Google(GIDClientID: GIDClientID)
-            
-            // Check reauth user is the same
-            guard rUser.uid == userAuthInfo.uid, !rIsNewUser else {
+            reauth = (rUser, rIsNewUser, nil)
+        }
+        
+        // Check reauth user is the same
+        if let rIsNewUser = reauth?.rIsNewUser {
+            guard !rIsNewUser else {
                 throw AuthError.changedAuthenticatedUser
             }
+        }
+        if let rUser = reauth?.rUser {
+            guard rUser.uid == userAuthInfo.uid else {
+                throw AuthError.changedAuthenticatedUser
+            }
+        }
+        
+        // Perform delete actions before auth is revoked
+        await performDeleteActionsBeforeAuthIsRevoked()
+        
+        if let rAuthCode = reauth?.rAuthorizationCode {
+            // Revoke the token https://firebase.google.com/docs/auth/ios/apple#token_revocation
+            try await Auth.auth().revokeToken(withAuthorizationCode: rAuthCode)
         }
         
         // Should never fail here
