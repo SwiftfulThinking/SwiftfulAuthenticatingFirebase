@@ -61,9 +61,12 @@ public struct FirebaseAuthService: AuthService {
     }
 
     /// Delete the user's authentication.
-    ///
-    /// WARNING: This will trigger the OS modal for the user to authenticate again before deleting their account. This is required as a security precaution for Firebase. If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token.
-    public func deleteAccount(option: SignInOption, performDeleteActionsBeforeAuthIsRevoked: () async -> Void) async throws {
+    /// 
+    /// WARNING: This will trigger the OS modal for the user to authenticate again before deleting their account. This is required as a security precaution for Firebase.
+    /// - Parameters:
+    ///   - option: If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token.
+    ///   - performDeleteActionsBeforeAuthIsRevoked: A change to perform actions after reauthentication but before account deletion. After this, the user's auth will be deleted and security rules requiring auth will fail. This is a good time to delete the user's Firestore documents if needed.
+    public func deleteAccount(option: SignInOption, performDeleteActionsBeforeAuthIsRevoked: () async throws -> Void) async throws {
         guard let userAuthInfo = getAuthenticatedUser() else {
             throw AuthError.userNotFound
         }
@@ -95,7 +98,7 @@ public struct FirebaseAuthService: AuthService {
         }
         
         // Perform delete actions before auth is revoked
-        await performDeleteActionsBeforeAuthIsRevoked()
+        try await performDeleteActionsBeforeAuthIsRevoked()
         
         if let rAuthCode = reauth?.rAuthorizationCode {
             // Revoke the token https://firebase.google.com/docs/auth/ios/apple#token_revocation
