@@ -47,7 +47,8 @@ public struct FirebaseAuthService: AuthService {
     public func signIn(option: SignInOption) async throws -> (user: UserAuthInfo, isNewUser: Bool) {
         switch option {
         case .apple:
-            return try await authenticateUser_Apple()
+            let (user, isNewUser, _) = try await authenticateUser_Apple()
+            return (user, isNewUser)
         case .google(GIDClientID: let GIDClientID):
             return try await authenticateUser_Google(GIDClientID: GIDClientID)
         case .anonymous:
@@ -59,11 +60,42 @@ public struct FirebaseAuthService: AuthService {
         try Auth.auth().signOut()
     }
 
-    public func deleteAccount() async throws {
+    /// Delete the user's authentication.
+    ///
+    /// WARNING: This will trigger the OS modal for the user to authenticate again before deleting their account. This is required as a security precaution for Firebase. If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token.
+    public func deleteAccount(option: SignInOption) async throws {
+        guard let userAuthInfo = getAuthenticatedUser() else {
+            throw AuthError.userNotFound
+        }
+        
+        switch option {
+        case .apple:
+            let (rUser, rIsNewUser, rAuthCode) = try await authenticateUser_Apple()
+            
+            // Check reauth user is the same
+            guard rUser.uid == userAuthInfo.uid, !rIsNewUser else {
+                throw AuthError.changedAuthenticatedUser
+            }
+            
+            // Revoke the token https://firebase.google.com/docs/auth/ios/apple#token_revocation
+            try await Auth.auth().revokeToken(withAuthorizationCode: rAuthCode)
+        case .anonymous:
+            break
+        case .google(let GIDClientID):
+            let (rUser, rIsNewUser) = try await authenticateUser_Google(GIDClientID: GIDClientID)
+            
+            // Check reauth user is the same
+            guard rUser.uid == userAuthInfo.uid, !rIsNewUser else {
+                throw AuthError.changedAuthenticatedUser
+            }
+        }
+        
+        // Should never fail here
         guard let user = Auth.auth().currentUser else {
             throw AuthError.userNotFound
         }
 
+        // Delete the user
         try await user.delete()
     }
 
@@ -76,6 +108,8 @@ extension FirebaseAuthService {
     private enum AuthError: LocalizedError {
         case noResponse
         case userNotFound
+        case unsupportedAuthProvider
+        case changedAuthenticatedUser
 
         var errorDescription: String? {
             switch self {
@@ -83,6 +117,10 @@ extension FirebaseAuthService {
                 return "Bad response."
             case .userNotFound:
                 return "Current user not found."
+            case .unsupportedAuthProvider:
+                return "Unsupported Authentication Provider found."
+            case .changedAuthenticatedUser:
+                return "Changed Authenticated User to a different account."
             }
         }
     }
@@ -96,7 +134,7 @@ extension FirebaseAuthService {
     }
 
     @MainActor
-    private func authenticateUser_Apple() async throws -> (user: UserAuthInfo, isNewUser: Bool) {
+    private func authenticateUser_Apple() async throws -> (user: UserAuthInfo, isNewUser: Bool, authorizationCode: String) {
         let helper = SignInWithAppleHelper()
 
         // Sign in to Apple
@@ -109,11 +147,13 @@ extension FirebaseAuthService {
             rawNonce: response.nonce
         )
         
-        return try await handleConnectToFirebase(
+        let (user, isNewUser) = try await handleConnectToFirebase(
             credential: credential,
             firstName: response.firstName,
             lastName: response.lastName
         )
+        
+        return (user, isNewUser, response.authCode)
     }
     
     @MainActor
