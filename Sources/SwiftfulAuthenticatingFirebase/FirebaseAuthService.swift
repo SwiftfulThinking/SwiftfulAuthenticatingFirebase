@@ -48,8 +48,10 @@ public struct FirebaseAuthService: AuthService {
     private func validateAuthToken(user: User) {
         Task {
             do {
-                let token = try await user.getIDToken(forcingRefresh: true)
+                let _ = try await user.getIDToken(forcingRefresh: true)
+                // Token is valid
             } catch let error as NSError {
+                // Token is not valid
                 if error.code == AuthErrorCode.userTokenExpired.rawValue || error.code == AuthErrorCode.userNotFound.rawValue {
                     try? signOut()
                 }
