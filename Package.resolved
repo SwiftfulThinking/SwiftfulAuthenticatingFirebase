@@ -1,5 +1,5 @@
 {
-  "originHash" : "5fe53301b991fb3b7571ab7770903130c00f314b4afdd5a2846e99ac4867b43e",
+  "originHash" : "b46b04c5bb1fd104a1a8cf71f0efa8f4de10b80f7f543d0bf06124a234abf6fe",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -141,8 +141,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SignInAppleAsync.git",
       "state" : {
-        "branch" : "development",
-        "revision" : "3a3a74077bc20a042ab4875b0acb1b165a36a603"
+        "revision" : "42242c92cbca2b20d69e808ef13a0bc54326254e",
+        "version" : "1.0.2"
       }
     },
     {
@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SignInGoogleAsync.git",
       "state" : {
-        "branch" : "development",
-        "revision" : "8974737f42e900cc899816d6c7381a338d471eaf"
+        "revision" : "7ed25f1aee0b96b8b41fed3d8759f1efd8b577a2",
+        "version" : "1.0.1"
       }
     },
     {
@@ -168,8 +168,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git",
       "state" : {
-        "branch" : "development",
-        "revision" : "21c1f5eec0522b564f60f0484e1aac2b8f3627fd"
+        "revision" : "6a86ba61f87b5b6a74e870dfdb47a49d01a65c4e",
+        "version" : "1.0.12"
       }
     }
   ],

@@ -17,10 +17,10 @@ let package = Package(
     ],
     dependencies: [
         // Here we add the dependency for the SendableDictionary package
-        .package(url: "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git", branch: "development"),
+        .package(url: "https://github.com/SwiftfulThinking/SwiftfulAuthenticating.git", "1.0.0"..<"2.0.0"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk.git", "11.0.0"..<"12.0.0"),
-        .package(url: "https://github.com/SwiftfulThinking/SignInAppleAsync.git", branch: "development"),
-        .package(url: "https://github.com/SwiftfulThinking/SignInGoogleAsync.git", branch: "development")
+        .package(url: "https://github.com/SwiftfulThinking/SignInAppleAsync.git", "1.0.0"..<"2.0.0"),
+        .package(url: "https://github.com/SwiftfulThinking/SignInGoogleAsync.git", "1.0.0"..<"2.0.0")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
