@@ -59,14 +59,23 @@ public struct FirebaseAuthService: AuthService {
     public func signOut() throws {
         try Auth.auth().signOut()
     }
+    
+    /// Delete user authentication (legacy)
+    public func deleteAccount() async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw AuthError.userNotFound
+        }
+        
+        try await user.delete()
+    }
 
-    /// Delete the user's authentication.
-    /// 
+    /// Delete the user's authentication, first triggering an OS modal for reauthentication, and then revoking the token if needed.
+    ///
     /// WARNING: This will trigger the OS modal for the user to authenticate again before deleting their account. This is required as a security precaution for Firebase.
     /// - Parameters:
-    ///   - option: If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token.
+    ///   - option: If the user is signed in to multiple authentication providers, Apple SSO should be the preferred reauthentication method as it will also revoke the Apple SSO token. Selecting .anonymous will do nothing.
     ///   - performDeleteActionsBeforeAuthIsRevoked: A change to perform actions after reauthentication but before account deletion. After this, the user's auth will be deleted and security rules requiring auth will fail. This is a good time to delete the user's Firestore documents if needed.
-    public func deleteAccount(option: SignInOption, performDeleteActionsBeforeAuthIsRevoked: () async throws -> Void) async throws {
+    public func deleteAccountWithReauthentication(option: SignInOption, revokeToken: Bool, performDeleteActionsBeforeAuthIsDeleted: () async throws -> Void) async throws {
         guard let userAuthInfo = getAuthenticatedUser() else {
             throw AuthError.userNotFound
         }
@@ -98,9 +107,9 @@ public struct FirebaseAuthService: AuthService {
         }
         
         // Perform delete actions before auth is revoked
-        try await performDeleteActionsBeforeAuthIsRevoked()
+        try await performDeleteActionsBeforeAuthIsDeleted()
         
-        if let rAuthCode = reauth?.rAuthorizationCode {
+        if revokeToken, let rAuthCode = reauth?.rAuthorizationCode {
             // Revoke the token https://firebase.google.com/docs/auth/ios/apple#token_revocation
             try await Auth.auth().revokeToken(withAuthorizationCode: rAuthCode)
         }
